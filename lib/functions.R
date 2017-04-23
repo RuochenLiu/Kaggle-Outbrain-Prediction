@@ -37,9 +37,9 @@ reorganize <- function(df_sample, df_all, variable){
 #           key_name (cat_id or topic_id)
 # Output  : dataframe (columns: doc_id, new_cluster)
 
-cluster <- function(df_sample, df_all, key_name, variable){
+cluster <- function(df_sample, df_all, variable){
   
-  new_doc_sample <- tidyr::spread(df_sample, key = key_name, value = con, fill = 0)
+  new_doc_sample <- tidyr::spread(df_sample, key = cat_id, value = con, fill = 0)
   
   doc_organized <- reorganize(df_sample = new_doc_sample, 
                               df_all = df_all,
@@ -54,14 +54,14 @@ cluster <- function(df_sample, df_all, key_name, variable){
 
 
 
-cluster2 <- function(df_sample, key_name, variable){
+cluster2 <- function(df_sample, variable){
   
-  new_doc_sample <- tidyr::spread(df_sample, key = key_name, value = con, fill = 0)
+  new_doc_sample <- tidyr::spread(df_sample, key = cat_id, value = con, fill = 0)
   
   # kmeans
-  doc_cluster <- kmeans(x=doc_organized[,-ncol(doc_organized)])
-  doc_organized$new_cluster <- doc_cluster$cluster
-  doc_final <- doc_organized[, c("doc_id", "new_cluster")]
+  doc_cluster <- kmeans(x=new_doc_sample[, -1])
+  new_doc_sample$new_cluster <- doc_cluster$cluster
+  doc_final <- new_doc_sample[, c("doc_id", "new_cluster")]
   
   return(doc_final)
 }
