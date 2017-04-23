@@ -54,12 +54,12 @@ cluster <- function(df_sample, df_all, variable){
 
 
 
-cluster2 <- function(df_sample, variable){
+cluster2 <- function(df_sample, variable, k){
   
   new_doc_sample <- tidyr::spread(df_sample, key = cat_id, value = con, fill = 0)
   
   # kmeans
-  doc_cluster <- kmeans(x=new_doc_sample[, -1])
+  doc_cluster <- kmeans(x=new_doc_sample[, -1], centers = k)
   new_doc_sample$new_cluster <- doc_cluster$cluster
   doc_final <- new_doc_sample[, c("doc_id", "new_cluster")]
   
@@ -67,6 +67,19 @@ cluster2 <- function(df_sample, variable){
 }
 
 
+
+
+cluster3 <- function(df_sample, variable, k){
+  
+  new_doc_sample <- tidyr::spread(df_sample, key = topic_id, value = con, fill = 0)
+  
+  # kmeans
+  doc_cluster <- kmeans(x=new_doc_sample[, -1], centers = k)
+  new_doc_sample$new_cluster <- doc_cluster$cluster
+  doc_final <- new_doc_sample[, c("doc_id", "new_cluster")]
+  
+  return(doc_final)
+}
 
 
 
