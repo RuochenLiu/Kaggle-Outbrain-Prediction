@@ -1,5 +1,4 @@
-
-# Funtion: Reorganize df with all categories/topics columns
+# Function: Reorganize df with all categories/topics columns
 # Input  : df_sample: sample (dataframe); 
 #          df_all: all data (dataframe):
 #          variable: column name to cluster upon (string)
@@ -55,6 +54,17 @@ cluster <- function(df_sample, df_all, key_name, variable){
 
 
 
+cluster2 <- function(df_sample, key_name, variable){
+  
+  new_doc_sample <- tidyr::spread(df_sample, key = key_name, value = con, fill = 0)
+  
+  # kmeans
+  doc_cluster <- kmeans(x=doc_organized[,-ncol(doc_organized)])
+  doc_organized$new_cluster <- doc_cluster$cluster
+  doc_final <- doc_organized[, c("doc_id", "new_cluster")]
+  
+  return(doc_final)
+}
 
 
 
