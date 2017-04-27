@@ -1,0 +1,13 @@
+TO DO:
+
+1. full data (cut nothing) upload
+
+2. add time (convert timezone according to country, assume server is in US)，transform to morning(6:00am--6:pm 0), night(6:00pm--next day 6:00am 1)
+
+3. add geo_location as continent
+
+4. add_advertiser
+
+5. check glm return value--meaning of each, how to select model
+
+
