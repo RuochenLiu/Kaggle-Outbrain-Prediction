@@ -23,19 +23,13 @@ close(con)
 ```
 
 ```{r}
-code2cont <- read.csv("../data/country_continent.csv", header = TRUE)
-code2cont[,1] <- as.character(code2cont[,1])
-code2cont[,2] <- as.character(code2cont[,2])
-colnames(code2cont) <- c("country","continent")
+load("../data/final_cutted.rdata")
+load("../output/Model0.rdata")
+model0 <- glm(clicked~doc_cat+doc_topic+geo_location+platform, data = cut, family = binomial) ## First 4 factor
+summary(model0)
+save(model0, file = "../output/Model0.rdata")
 
-
-r <- res[1:1000000,]
-r$geo_location <- as.character(r$geo_location)
-
-
-library(dplyr)
-newr <- na.omit(r)
-newr <- merge(newr, code2cont, by.x = geo_location, by.y = country, all.x = TRUE)
-
+model1 <- glm(clicked~doc_cat+doc_topic+platform, data = cut, family = binomial) ## Remove geo info.
+summary(model1)
+save(model1, file = "../output/Model1.rdata")
 ```
-
