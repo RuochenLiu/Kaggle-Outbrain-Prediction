@@ -1,0 +1,41 @@
+---
+title: "Proj5"
+author: "Ruochen Liu rl2841"
+date: "April 19, 2017"
+output: html_document
+---
+
+```{r}
+library(RODBC)
+
+con  <- odbcConnect("project5261", uid="bpeng", pwd= "qqqq123456")
+
+tb <- sqlTables(con, schema = "dbo")
+
+res <- sqlFetch(con, "final")
+
+res <- as.data.frame(res)
+
+save(res, file = "../output/Outbrain.RData")
+
+close(con)
+
+```
+
+```{r}
+code2cont <- read.csv("../data/country_continent.csv", header = TRUE)
+code2cont[,1] <- as.character(code2cont[,1])
+code2cont[,2] <- as.character(code2cont[,2])
+colnames(code2cont) <- c("country","continent")
+
+
+r <- res[1:1000000,]
+r$geo_location <- as.character(r$geo_location)
+
+
+library(dplyr)
+newr <- na.omit(r)
+newr <- merge(newr, code2cont, by.x = geo_location, by.y = country, all.x = TRUE)
+
+```
+
