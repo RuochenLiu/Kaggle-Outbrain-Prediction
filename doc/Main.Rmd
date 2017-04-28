@@ -5,7 +5,10 @@ date: "April 27, 2017"
 output: html_document
 ---
 
+#SQL Cloud Database
+
 This chunk contains the SQL commands that cleaned the data, transformed formats and merged the tables by document_id, ad_id and user_id. The final output is the "final" table stored in the online database.
+
 ```{SQL}
 --merge tables: all-info of doc
 select 
@@ -163,6 +166,7 @@ cut_index <- sample(full_index, 200000)
 cut <- final[which(final$display_id %in% cut_index), ]
 ```
 
+# Data Preprocessing
 Transform timestamp into a AM/PM variable
 ```{r}
 times <- cut$timestamp
@@ -213,3 +217,23 @@ train <- cut[which(cut$display_id %in% train_index), ]
 test <- cut[-which(cut$display_id %in% train_index), ]
 ```
 
+Clustering inactive advertisers with hard threshold
+```{r}
+ad <- sort(table(train$advertiser_id), decreasing = T)
+ad <- data.frame(ad_id = names(ad), count = as.numeric(ad))
+plot(ad$count)
+ad_else <- ad$ad_id[701:3299]
+test <- test %>% 
+  mutate( advertiser = 
+            ifelse(as.character(advertiser_id) %in% train$advertiser,
+                   as.character(advertiser_id), 0))
+```
+
+#Train Logistic Regression Model
+```{r}
+model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser, 
+                   data = train, family = binomial(logit), fitted = T)
+```
+
+Test over test set
+```
