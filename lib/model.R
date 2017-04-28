@@ -3,6 +3,7 @@ ad <- data.frame(ad_id = names(ad), count = as.numeric(ad))
 plot(ad$count)
 ad_else <- ad$ad_id[701:3299]
 
+#train
 library(dplyr)
 model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser, 
                    data = train, family = binomial(logit), fitted = T)
@@ -13,6 +14,7 @@ test <- test %>%
             ifelse(as.character(advertiser_id) %in% train$advertiser,
                    as.character(advertiser_id), 0))
 
+#test
 for (i in 1:14) {
   test[,i] <- as.factor(test[,i])
 }
@@ -42,9 +44,6 @@ for (i in 1:length(number)){
 predict_result$Rank <- Rank
 
 #Evaluation
-
-
-
 
 
 print( mean( predict_result[, sum(clicked/sort) , by="display_id" ]$V1 ) )

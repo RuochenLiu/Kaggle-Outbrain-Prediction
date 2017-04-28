@@ -266,6 +266,23 @@ Rearrange the data by display_id and descending probability of being clicked
 ```{r}
 library(data.table)
 library(dplyr)
-a <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) %>% arrange(desc(prob)) %>% mutate(Rank=order(prob))  
+predict_result <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) 
+```
+
+
+Calculate test accuracy for evaluation
+```{r}
+unique(test$display_id)
+
+setorderv(predict_result, c("display_id", "prob"), c(1,-1)) 
+
+id <- table(test$display_id)
+number <- as.numeric(id)
+Rank <- c()
+for (i in 1:length(number)){
+  Rank <- c(Rank, 1:number[i])
+}
+
+predict_result$Rank <- Rank
 ```
 
