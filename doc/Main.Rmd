@@ -227,6 +227,10 @@ test <- test %>%
   mutate( advertiser = 
             ifelse(as.character(advertiser_id) %in% train$advertiser,
                    as.character(advertiser_id), 0))
+```
+
+Clean data
+```{r}
 for (i in 1:14) {
   train[,i] <- as.factor(train[,i])
 }
@@ -235,7 +239,7 @@ for (i in 1:14) {
 }
 ```
 
-#Train Logistic Regression Model
+Train Logistic Regression Model
 ```{r}
 model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser, 
                    data = train, family = binomial(logit), fitted = T)
