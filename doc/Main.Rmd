@@ -1,0 +1,215 @@
+---
+title: "Main"
+author: "Bo Peng"
+date: "April 27, 2017"
+output: html_document
+---
+
+This chunk contains the SQL commands that cleaned the data, transformed formats and merged the tables by document_id, ad_id and user_id. The final output is the "final" table stored in the online database.
+```{SQL}
+--merge tables: all-info of doc
+select 
+documents_categories.document_id as doc_id,
+documents_categories.category_id as category_id,
+documents_categories.confidence_level as category_confidence,
+documents_meta.source_id as source_id,
+documents_meta.publish_time as publish_time,
+documents_meta.publisher_id as publisher_id,
+documents_topics.topic_id as topic_id, 
+documents_topics.confidence_level as topic_confidence
+into doc_info
+from documents_categories
+join documents_meta on documents_categories.document_id=documents_meta.document_id
+join documents_topics on documents_categories.document_id = documents_topics.document_id;
+
+
+--create doc_category with same doc_id as in doc_info 
+select * into unique_doc_cat_id
+from (
+select distinct document_id from documents_categories
+intersect
+select distinct doc_id from doc_info) as a;
+
+select 
+a.document_id as doc_id,
+a.category_id as cat_id,
+a.confidence_level as cat_con
+into doc_category
+from documents_categories a
+inner join unique_doc_cat_id b
+on a.document_id  =  b.document_id;
+
+
+--create doc_topic with same doc_id as in doc_info 
+select * into unique_doc_topic_id
+from (
+select distinct document_id from documents_topics
+intersect
+select distinct doc_id from doc_info) as a;
+
+select 
+a.document_id as doc_id,
+a.topic_id as topic_id,
+a.confidence_level as cat_con
+into doc_topic
+from documents_topics a
+inner join unique_doc_topic_id b
+on a.document_id  =  b.document_id;
+
+
+
+--create doc_meta with same doc_id as in doc_info 
+select * into unique_doc_meta_id
+from (
+select distinct document_id from documents_meta
+intersect
+select distinct doc_id from doc_info) as a;
+
+select 
+a.document_id as doc_id,
+a.source_id as source_id,
+a.publisher_id as publisher,
+a.publish_time as time
+into doc_meta
+from documents_meta a
+inner join unique_doc_meta_id b
+on a.document_id  =  b.document_id;
+
+
+
+--sample 200000 doc_id 
+select top 200000 * into doc_id_sample
+from unique_doc_cat_id;
+
+
+--sampled doc_category with 200000 sampled doc_id 
+select 
+a.doc_id as doc_id,
+a.cat_id as cat_id,
+a.cat_con as con
+into cat_sample
+from doc_category a
+inner join doc_id_sample b
+on a.doc_id  =  b.document_id;
+
+
+--sampled doc_topic with 200000 sampled doc_id 
+select 
+a.doc_id as doc_id,
+a.topic_id as topic_id,
+a.cat_con as con
+into topic_sample
+from doc_topic a
+inner join doc_id_sample b
+on a.doc_id  =  b.document_id;
+
+
+--sampled doc_meta with 200000 sampled doc_id 
+select 
+a.doc_id as doc_id,
+a.source_id as source_id,
+a.publisher as publisher,
+a.time as publish_time
+into meta_sample
+from doc_meta a
+inner join doc_id_sample b
+on a.doc_id  =  b.document_id;
+
+
+--merged doc with new clusters for categories and topics 
+select 
+a.doc_id as doc_id,
+a.new_cluster as cat,
+b.new_cluster as topic,
+c.source_id as source_id,
+c.publisher as publisher,
+c.publish_time as publish_time
+into doc_merge
+from cat_clustered a
+join topic_clustered b on a.doc_id=b.doc_id
+join meta_sample c on a.doc_id=c.doc_id;
+
+
+--get the final table with all data merged with sampled doc_id
+SELECT 
+clicks_train.display_id, 
+clicks_train.ad_id, 
+clicks_train.clicked,
+clicks_events.document_id, 
+clicks_events.geo_location, 
+clicks_events.platform, 
+clicks_events.timestamp, 
+clicks_events.uuid
+INTO sum_clicks_events
+FROM clicks_train, clicks_events
+WHERE clicks_train.display_id = clicks_events.display_id
+ORDER BY clicks_train.display_id ASC;
+
+
+--update the final table with geo_location represents only countries
+UPDATE final
+SET geo_location = LEFT(geo_location, 2);
+```
+
+Fetch the "final" table from AWS RDS and store as data.frame
+To access the RDS from the R console, in the "ODBC Data Sources" program (pre-installed if you are using a Windows machine), create a data source called "project5243", using type "ODBC Driver for SQL Server", server "project5261.ckquajgj1vtb.us-east-1.rds.amazonaws.com,1433", verification method "SQL Server Verification", user name "bpeng", password "qqqq123456".
+```{r}
+library(RODBC)
+# establish connection to the AWS RDS.
+cnt <- odbcConnect(dsn = "project5243", uid = "bpeng", pwd = "qqqq123456")
+final <- RODBC::sqlQuery(cnt, query = "SELECT * FROM Project5261.dbo.final")
+full_index <- unique(final$display_id)
+cut_index <- sample(full_index, 200000)
+cut <- final[which(final$display_id %in% cut_index), ]
+```
+
+Transform timestamp into a AM/PM variable
+```{r}
+times <- cut$timestamp
+times <- as.numeric(times)
+times <- times+1465876799998 
+times <- times/1000
+class(times) = c('POSIXt','POSIXct')
+pm(times)
+sum(pm(times))
+cut$pm <- pm(times)
+```
+
+Keep only the country code component in the geo_locatin variable
+```{r}
+cut$geo_location <- as.character(cut$geo_location)
+cut$geo_location <- substr(cut$geo_location, start = 1, stop = 2)
+```
+
+Transform country codes into continent codes
+```{r}
+
+cut_country <- data.frame(c(1:nrow(cut)),cut[,"geo_location"])
+colnames(cut_country) <- c("index", "country")
+continent <- read.csv("../data/all.csv")[, c("alpha.2", "region")]
+colnames(continent) <- c("country", "region")
+
+country_region <- merge(x = cut_country, y = continent, all.x = T)
+sorted_country <- country_region[order(country_region$index), ]
+
+region <- sorted_country[ ,"region"]
+cut$region <- region
+```
+
+Eliminate rows containing NAs and convert into factors
+```{r}
+cut <- na.omit(cut)
+
+for (i in 1:ncol(cut)) {
+  cut[,i] <- as.factor(cut[,i])
+}
+```
+
+Randomly sample 90% of the data as training set, and the remaining 10% as testing set.
+```{r}
+full_index <- unique(cut$display_id)
+train_index <- sample(full_index, 180000)
+train <- cut[which(cut$display_id %in% train_index), ]
+test <- cut[-which(cut$display_id %in% train_index), ]
+```
+

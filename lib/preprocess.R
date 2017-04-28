@@ -7,9 +7,6 @@ full_index <- unique(final$display_id)
 cut_index <- sample(full_index, 200000)
 cut <- final[which(final$display_id %in% cut_index), ]
 
-cut <- cut[,-c(2,3,4,7)]
-cut <- cut[,-6]
-
 times <- cut$timestamp
 times <- as.numeric(times)
 times <- times+1465876799998 
@@ -34,10 +31,10 @@ sorted_country <- country_region[order(country_region$index), ]
 region <- sorted_country[ ,"region"]
 cut$region <- region
 
+cut <- na.omit(cut)
 for (i in 1:ncol(cut)) {
   cut[,i] <- as.factor(cut[,i])
 }
-cut <- na.omit(cut)
 
 
 full_index <- unique(cut$display_id)
