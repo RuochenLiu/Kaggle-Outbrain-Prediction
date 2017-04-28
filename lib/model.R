@@ -26,8 +26,25 @@ test.prob <- prob(test.predict)
 
 test$prob <- test.prob
 
-a <- test %>% select(display_id,ad_id, clicked, prob)    group_by(display_id) 
+predict_result <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) 
 
-%>% arrange(desc(prob)) %>% mutate(Rank=order(prob))  
+unique(test$display_id)
 
-save(test.predict, file = "testprediction.RData")
+setorderv(predict_result, c("display_id", "prob"), c(1,-1)) 
+
+id <- table(test$display_id)
+number <- as.numeric(id)
+Rank <- c()
+for (i in 1:length(number)){
+  Rank <- c(Rank, 1:number[i])
+}
+
+predict_result$Rank <- Rank
+
+#Evaluation
+
+
+
+
+
+print( mean( predict_result[, sum(clicked/sort) , by="display_id" ]$V1 ) )
