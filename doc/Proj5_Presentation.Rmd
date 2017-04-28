@@ -1,0 +1,78 @@
+---
+title: "Click or not"
+author: "group 2"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+##  **(1)Problem Description**
+
+* The internet is a stimulating treasure trove of possibility. Every day we stumble on news stories relevant to our communities or experience the serendipity of finding an article covering our next travel destination.
+* We are challenged to predict which pieces of content its global base of users are likely to click on.
+![](../figs/Website.png)
+
+
+## **(2)Data**
+
+* Data comes from Kaggle.com
+* Raw data includes Content of websites, information of users who browsed the website and information of ads on the websites.
+* Data contains all kinds of information, which is challenging and interesting.
+
+![](../figs/Raw Data.png)
+
+
+* Given the information of website, users and ads on the website, We will predict the probility of each ad being clicked and use Mean Average Precision to evaluate the result.
+
+![](../figs/MAP.png)
+
+
+
+
+## **(3)First Attempt**
+
+* Firstly we tried a relatively Bayesian method which focus on the click itself.
+
+![](../figs/Formual.png)
+
+* R is the average clicked rate of an ad.
+* v is the times an ad was displayed.
+* C is the mean clicked rate around all ads in the data.
+* m is the minimum displaying times required for an ad.
+
+* The method is very efficient and the result is not bad.
+
+![](../figs/First Result.png)
+
+## **(4)Advanced Exploation**
+* We want to use more information in the dataset to get a more precise result.
+* Logistics Regression is a good way to predict probility.
+
+### **Data Processing**
+
+* The raw data is way too large to process in R. SQL is the only choice.
+* Delete unrelative information
+* Use k-means cluster to reduce the number of catagories in data.
+
+
+![](../figs/Final Data.png)
+
+### **Variable Selection**
+
+* After processing, there still are plenty of variables.
+* Since regression includes matrix calculation, we still need to select necessary variables to reduce calculation time.
+* Backward selection is applied to select variables.
+
+![](../figs/Backward.png)
+
+### **Result**
+![](../figs/Screen Shot 2017-04-28 at 12.53.57 PM.png)
+![](../figs/Screen Shot 2017-04-28 at 12.54.45 PM.png)
+![](../figs/Screen Shot 2017-04-28 at 1.46.38 PM.png)
+
+## **(5)Summary**
+* We use two methods to predict which ad will be clicked, both of them give us ideal result.
+
+
+
+
