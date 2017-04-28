@@ -219,6 +219,7 @@ test <- cut[-which(cut$display_id %in% train_index), ]
 
 Clustering inactive advertisers with hard threshold
 ```{r}
+library(dplyr)
 ad <- sort(table(train$advertiser_id), decreasing = T)
 ad <- data.frame(ad_id = names(ad), count = as.numeric(ad))
 plot(ad$count)
@@ -231,10 +232,10 @@ test <- test %>%
 
 Clean data
 ```{r}
-for (i in 1:14) {
+for (i in 2:14) {
   train[,i] <- as.factor(train[,i])
 }
-for (i in 1:14) {
+for (i in 2:14) {
   test[,i] <- as.factor(test[,i])
 }
 ```
@@ -247,6 +248,25 @@ model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser,
 
 Test over test set
 ```{r}
-model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser, 
-                   data = train, family = binomial(logit), fitted = T)
+test.predict <- predict(model3, test)
 ```
+
+Convert logit results into probability
+```{r}
+prob <- function(x){
+  return(exp(x)/(1+exp(x)))
+}
+
+test.prob <- prob(test.predict)
+
+test$prob <- test.prob
+```
+
+Rearrange the data by display_id and descending probability of being clicked
+```{r}
+library(data.table)
+library(dplyr)
+a <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) 
+%>% arrange(desc(prob)) %>% mutate(Rank=order(prob))  
+```
+
