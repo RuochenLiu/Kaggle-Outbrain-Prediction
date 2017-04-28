@@ -1,0 +1,32 @@
+---
+title: "Advertiser"
+author: "GRP2"
+date: "April 27, 2017"
+output: html_document
+---
+
+```{r}
+ad <- sort(table(train$advertiser_id), decreasing = T)
+ad <- data.frame(ad_id = names(ad), count = as.numeric(ad))
+plot(ad$count)
+ad_else <- ad$ad_id[701:3299]
+train$advertiser <- rep(0, length(train$advertiser_id))
+for (i in 1:length(train$advertiser_id)) {
+  train$advertiser[i] <- ifelse(train$advertiser_id[i] %in% ad_else, 0, train$advertiser_id[i])
+}
+
+```
+
+```{r}
+library(dplyr)
+
+train <- train %>% mutate( advertiser = ifelse(as.character(advertiser_id) %in% ad_else, 0, as.character(advertiser_id) ))
+
+install.packages("biglm")
+library(biglm)
+install.packages("speedglm")
+library(speedglm)
+
+
+model0 <- speedglm(clicked~cat_cluster+topic_cluster+region+pm+platform+as.factor(advertiser), data = train, family = binomial(logit))
+```
