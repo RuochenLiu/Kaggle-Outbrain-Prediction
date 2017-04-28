@@ -266,7 +266,6 @@ Rearrange the data by display_id and descending probability of being clicked
 ```{r}
 library(data.table)
 library(dplyr)
-a <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) 
-%>% arrange(desc(prob)) %>% mutate(Rank=order(prob))  
+a <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) %>% arrange(desc(prob)) %>% mutate(Rank=order(prob))  
 ```
 
