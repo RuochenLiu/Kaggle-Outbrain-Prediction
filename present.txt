@@ -1,0 +1,14 @@
+try sql with extreme huge related data
+
+use sql cloud amazon web server 
+
+clean and simplify the data 
+
+combine inactive advertiser using hard thresthold 
+
+clustering: k-means in categories and topics
+
+logistic regression: backward selection to choose 
+
+
+
