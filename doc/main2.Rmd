@@ -2,7 +2,9 @@
 title: "Main"
 author: "Bo Peng"
 date: "April 27, 2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 #SQL Cloud Database
@@ -156,7 +158,7 @@ SET geo_location = LEFT(geo_location, 2);
 
 Fetch the "final" table from AWS RDS and store as data.frame
 To access the RDS from the R console, in the "ODBC Data Sources" program (pre-installed if you are using a Windows machine), create a data source called "project5243", using type "ODBC Driver for SQL Server", server "project5261.ckquajgj1vtb.us-east-1.rds.amazonaws.com,1433", verification method "SQL Server Verification", user name "bpeng", password "qqqq123456".
-```{r}
+```{r, eval=FALSE, include=FALSE}
 library(RODBC)
 # establish connection to the AWS RDS.
 cnt <- odbcConnect(dsn = "project5243", uid = "bpeng", pwd = "qqqq123456")
@@ -168,7 +170,7 @@ cut <- final[which(final$display_id %in% cut_index), ]
 
 # Data Preprocessing
 Transform timestamp into a AM/PM variable
-```{r}
+```{r, eval=FALSE, include=FALSE}
 times <- cut$timestamp
 times <- as.numeric(times)
 times <- times+1465876799998 
@@ -180,13 +182,13 @@ cut$pm <- pm(times)
 ```
 
 Keep only the country code component in the geo_locatin variable
-```{r}
+```{r, eval=FALSE, include=FALSE}
 cut$geo_location <- as.character(cut$geo_location)
 cut$geo_location <- substr(cut$geo_location, start = 1, stop = 2)
 ```
 
 Transform country codes into continent codes
-```{r}
+```{r, eval=FALSE, include=FALSE}
 
 cut_country <- data.frame(c(1:nrow(cut)),cut[,"geo_location"])
 colnames(cut_country) <- c("index", "country")
@@ -201,7 +203,7 @@ cut$region <- region
 ```
 
 Eliminate rows containing NAs and convert into factors
-```{r}
+```{r, eval=FALSE, include=FALSE}
 cut <- na.omit(cut)
 
 for (i in 1:ncol(cut)) {
@@ -210,7 +212,7 @@ for (i in 1:ncol(cut)) {
 ```
 
 Randomly sample 90% of the data as training set, and the remaining 10% as testing set.
-```{r}
+```{r, eval=FALSE, include=FALSE}
 full_index <- unique(cut$display_id)
 train_index <- sample(full_index, 180000)
 train <- cut[which(cut$display_id %in% train_index), ]
@@ -218,7 +220,7 @@ test <- cut[-which(cut$display_id %in% train_index), ]
 ```
 
 Clustering inactive advertisers with hard threshold
-```{r}
+```{r, eval=FALSE, include=FALSE}
 library(dplyr)
 ad <- sort(table(train$advertiser_id), decreasing = T)
 ad <- data.frame(ad_id = names(ad), count = as.numeric(ad))
@@ -235,7 +237,7 @@ test <- test %>%
 ```
 
 Clean data
-```{r}
+```{r, eval=FALSE, include=FALSE}
 for (i in 2:14) {
   train[,i] <- as.factor(train[,i])
 }
@@ -245,20 +247,26 @@ for (i in 2:14) {
 ```
 
 # Train Logistic Regression Model
-```{r}
+```{r, eval=FALSE, include=FALSE}
 model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser, 
                    data = train, family = binomial(logit), fitted = T)
-summary(model3)
+```
+
+
+```{r,echo=FALSE}
+library(speedglm)
+load("../output/Model3.rdata")
+
 ```
 
 
 # Test over test set
-```{r}
+```{r, eval=FALSE, include=FALSE}
 test.predict <- predict(model3, test)
 ```
 
 Convert logit results into probability
-```{r}
+```{r, eval=FALSE, include=FALSE}
 prob <- function(x){
   return(exp(x)/(1+exp(x)))
 }
@@ -270,7 +278,7 @@ test$prob <- test.prob
 
 # Evaluation
 Rearrange the data by display_id and descending probability of being clicked
-```{r}
+```{r, eval=FALSE, include=FALSE}
 library(data.table)
 library(dplyr)
 predict_result <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) 
@@ -278,7 +286,7 @@ predict_result <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(
 
 
 Calculate test accuracy for evaluation
-```{r}
+```{r, eval=FALSE, include=FALSE}
 unique(test$display_id)
 
 setorderv(predict_result, c("display_id", "prob"), c(1,-1)) 
@@ -297,3 +305,10 @@ head(predict_result, 30)
 final_score <- sum(predict_result$score)/length(unique(predict_result$display_id))
 cat(final_score)
 ```
+
+```{r,echo=FALSE}
+load("../output/testevaluation.rdata")
+head(predict_result,30)
+cat(final_score)
+```
+
