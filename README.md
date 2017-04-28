@@ -25,6 +25,7 @@ This project aims to predict which pieces of content its global base of users ar
 +SQL Queries: Yini Zhang, Ruochen Liu, Bo Peng
 +Data Cleaning: Yini Zhang, Bo Peng, Zheren Tang, Zeyu Gan
 +Logistic Regression: Ruochen Liu, Zheren Tang
++Git Repo: Bo Peng, Yini Zhang
 +Presentation: Zeyu Gan 
 
 All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
