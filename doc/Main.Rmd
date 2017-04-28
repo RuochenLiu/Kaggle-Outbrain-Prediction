@@ -284,5 +284,9 @@ for (i in 1:length(number)){
 }
 
 predict_result$Rank <- Rank
+
+predict_result <- predict_result %>% mutate(score = as.numeric(paste(clicked))/Rank) 
+final_score <- sum(predict_result$score)/length(unique(predict_result$display_id))
+cat(final_score)
 ```
 
