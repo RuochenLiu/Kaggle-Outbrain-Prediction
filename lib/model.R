@@ -7,6 +7,7 @@ library(dplyr)
 model3 <- speedglm(clicked~cat_cluster+topic_cluster+pm+platform+advertiser, 
                    data = train, family = binomial(logit), fitted = T)
 
+save(model3, file = "Model3.rdata")
 
 test <- test %>% 
   mutate( advertiser = 
@@ -23,13 +24,9 @@ prob <- function(x){
 }
 
 test.prob <- prob(test.predict)
-
 test$prob <- test.prob
 
 predict_result <- test %>% select(display_id,ad_id, clicked, prob) %>% group_by(display_id) 
-
-unique(test$display_id)
-
 setorderv(predict_result, c("display_id", "prob"), c(1,-1)) 
 
 id <- table(test$display_id)
@@ -41,8 +38,9 @@ for (i in 1:length(number)){
 
 predict_result$Rank <- Rank
 
-#Evaluation
+#save(predict_result, final_score, file = "testevaluation.rdata")
 
+#Evaluation
 predict_result <- predict_result %>% mutate(score = as.numeric(paste(clicked))/Rank) 
 final_score <- sum(predict_result$score)/length(unique(predict_result$display_id))
 cat(final_score)
