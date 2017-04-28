@@ -14,13 +14,13 @@ Term: Spring 2017
 	+ Ruochen Liu rl2841
 	+ Zheren Tang zt2191
 	+ Yini Zhang yz3005
-	+ Zeyu Gan zg1145
+	+ Zeyu Gan zg2245
 
 + Project summary: 
 
 The internet is a stimulating treasure trove of possibility. Every day we stumble on 
 news stories relevant to our communities or experience the serendipity of finding an 
-article covering our next travel destination. Outbrain, the web¡¯s leading content 
+article covering our next travel destination. Outbrain, the webï¼Šs leading content 
 discovery platform, delivers these moments while we surf our favorite sites. Currently, 
 Outbrain pairs relevant content with curious readers in about 250 billion personalized 
 recommendations every month across many thousands of sites. 
@@ -60,11 +60,11 @@ orgarnized as follows.
 
 ```
 proj/
-©À©¤©¤ lib/
-©À©¤©¤ data/
-©À©¤©¤ doc/
-©À©¤©¤ figs/
-©¸©¤©¤ output/
+å¿µå²¸å²¸ lib/
+å¿µå²¸å²¸ data/
+å¿µå²¸å²¸ doc/
+å¿µå²¸å²¸ figs/
+å¼©å²¸å²¸ output/
 ```
 
 Please see each subfolder for a README file.
